@@ -361,27 +361,13 @@ yq -i '.["external-ui-url"] = "https://github.com/Zephyruso/zashboard/releases/l
 yq -i 'del(.tun)' "$NEW"
 yq -i 'del(.proxies)' "$NEW"
 
-PROV="/opt/etc/mihomo/proxy_providers/sub.yml"
 
-if [ -s "$PROV" ]; then
-  SRC="$PROV"
-else
-  HTTP_CODE="$(curl -sSL --connect-timeout 15 -m 60 -w '%{http_code}' -o "$TMP" \
-    -H "x-hwid: $HWID" \
-    -H "x-device-os: Keenetic OS" \
-    -H "x-ver-os: $OS_VER" \
-    -H "x-device-model: $MODEL" \
-    -H "User-Agent: $UA" \
-    "$SUB_URL")" || fail "Failed to download subscription"
-  [ "$HTTP_CODE" = "200" ] || fail "Subscription HTTP $HTTP_CODE"
-  SRC="$TMP"
-fi
 
-CNT="$(yq '.proxies | length' "$SRC" 2>/dev/null)"
-[ "${CNT:-0}" -gt 0 ] || fail "No proxies found in $SRC"
+CNT="$(yq '.proxies | length' "$TMP" 2>/dev/null)"
+[ "${CNT:-0}" -gt 0 ] || fail "No proxies found in $TMP"
 
 yq -i '
-  (load("'"$SRC"'") | [.proxies[].name]) as $names |
+  (load("'"$TMP"'") | [.proxies[].name]) as $names |
   (.proxy-groups[] | select(has("proxies")) | .proxies) |=
     map(select(. as $p | $names | any_c(. == $p) | not))
 ' "$NEW"
@@ -407,7 +393,7 @@ yq -i '
     "override": {"udp": true},
     "health-check": {
       "enable": true,
-      "url": "http://cp.cloudflare.com/generate_204",
+      "url": "http://detectportal.firefox.com/success.txt",
       "interval": 300,
       "timeout": 5000,
       "lazy": true,
