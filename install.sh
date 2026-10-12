@@ -393,11 +393,11 @@ yq -i '
     "override": {"udp": true},
     "health-check": {
       "enable": true,
-      "url": "http://detectportal.firefox.com/success.txt",
+      "url": "http://www.gstatic.com/generate_204",
       "interval": 300,
       "timeout": 5000,
       "lazy": true,
-      "expected-status": 200
+      "expected-status": 204
     }
   }
 ' "$NEW"
