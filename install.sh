@@ -359,8 +359,65 @@ yq -i '.["external-ui-url"] = "https://github.com/Zephyruso/zashboard/releases/l
 
 
 yq -i 'del(.tun)' "$NEW"
+yq -i 'del(.proxies)' "$NEW"
 
-# 4) если в конфиге есть http proxy-providers — добавляем им HWID-заголовки
+PROV="/opt/etc/mihomo/proxy_providers/sub.yml"
+
+if [ -s "$PROV" ]; then
+  SRC="$PROV"
+else
+  # провайдер ещё не скачан, берём ответ подписки
+  HTTP_CODE="$(curl -sSL --connect-timeout 15 -m 60 -w '%{http_code}' -o "$TMP" \
+    -H "x-hwid: $HWID" \
+    -H "x-device-os: Keenetic OS" \
+    -H "x-ver-os: $OS_VER" \
+    -H "x-device-model: $MODEL" \
+    -H "User-Agent: $UA" \
+    "$SUB_URL")" || fail "Failed to download subscription"
+  [ "$HTTP_CODE" = "200" ] || fail "Subscription HTTP $HTTP_CODE"
+  SRC="$TMP"
+fi
+
+CNT="$(yq '.proxies | length' "$SRC" 2>/dev/null)"
+[ "${CNT:-0}" -gt 0 ] || fail "No proxies found in $SRC"
+
+yq -i '
+  (load("'"$SRC"'") | [.proxies[].name]) as $names |
+  (.proxy-groups[] | select(has("proxies")) | .proxies) |=
+    map(select(. as $p | $names | any_c(. == $p) | not))
+' "$NEW"
+
+
+yq -i '
+  del(.proxy-groups[] | select(has("proxies") and (.proxies | length) == 0) | .proxies)
+' "$NEW"
+
+yq -i '
+  .proxy-providers.subscription = {
+    "type": "http",
+    "url": "'"$SUB_URL"'",
+    "path": "./proxy_providers/sub.yml",
+    "header": {
+      "User-Agent": ["'"$UA"'"],
+      "x-hwid": ["'"$HWID"'"],
+      "x-device-os": ["Keenetic OS"],
+      "x-ver-os": ["'"$OS_VER"'"],
+      "x-device-model": ["'"$MODEL"'"]
+    },
+    "override": {"udp": true},
+    "health-check": {
+      "enable": true,
+      "url": "http://cp.cloudflare.com/generate_204",
+      "interval": 300,
+      "timeout": 5000,
+      "lazy": true,
+      "expected-status": 204
+    }
+  }
+' "$NEW"
+
+yq -i '.proxy-groups[] |= (.use = ((.use // []) + ["subscription"] | unique))' "$NEW"
+
 if yq -e '((.["proxy-providers"] // {}) | length) > 0' "$NEW" >/dev/null 2>&1; then
   yq -i '(.["proxy-providers"][] | select(.type == "http") | .header) = {"User-Agent":[strenv(UA)],"x-hwid":[strenv(HWID)],"x-device-os":["Keenetic OS"],"x-ver-os":[strenv(OS_VER)],"x-device-model":[strenv(MODEL)]}' "$NEW"
 fi
