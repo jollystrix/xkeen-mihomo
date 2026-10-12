@@ -366,7 +366,6 @@ PROV="/opt/etc/mihomo/proxy_providers/sub.yml"
 if [ -s "$PROV" ]; then
   SRC="$PROV"
 else
-  # провайдер ещё не скачан, берём ответ подписки
   HTTP_CODE="$(curl -sSL --connect-timeout 15 -m 60 -w '%{http_code}' -o "$TMP" \
     -H "x-hwid: $HWID" \
     -H "x-device-os: Keenetic OS" \
