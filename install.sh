@@ -312,6 +312,22 @@ NEW="/tmp/mihomo-sub.$$.new.yaml"
 trap 'rm -f "$TMP" "$NEW"' EXIT
 fail() { echo "[$(date '+%F %T')] ERROR: $*" >&2; exit 1; }
 
+INSTALLER_URL="https://cdn.jsdelivr.net/gh/jollystrix/xkeen-mihomo@master/install.sh"
+SELF_PATH="$CONF_DIR/update-config.sh"
+
+SELF_TMP="/tmp/mihomo-self.$$.sh"
+if curl -fsSL --connect-timeout 10 -m 30 "$INSTALLER_URL" 2>/dev/null \
+  | awk '/^cat > "\$UPDATE_SCRIPT" <<.UPDATEEOF.$/ {f=1; next}
+         /^UPDATEEOF$/ {if (f) exit}
+         f' > "$SELF_TMP" \
+  && [ -s "$SELF_TMP" ] && sh -n "$SELF_TMP" 2>/dev/null \
+  && ! cmp -s "$SELF_TMP" "$SELF_PATH"; then
+  cp "$SELF_PATH" "$SELF_PATH.bak"
+  chmod +x "$SELF_TMP" && mv -f "$SELF_TMP" "$SELF_PATH"
+  echo "[$(date '+%F %T')] Update script updated (will be used on next run)."
+fi
+rm -f "$SELF_TMP"
+
 [ -s "$SUB_FILE" ] || fail "Not found file: $SUB_FILE"
 SUB_URL="$(head -n 1 "$SUB_FILE")"
 
