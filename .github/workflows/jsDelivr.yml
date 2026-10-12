@@ -1,0 +1,21 @@
+name: Purge jsDelivr CDN
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Каждый день в 00:30 UTC
+  workflow_dispatch:
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Purge jsDelivr CDN for all files
+        run: |
+          for file in $(find . -type f -not -path "./.git/*" | sed 's|^\./||'); do
+            cmd="curl -I \"https://purge.jsdelivr.net/gh/${{ github.repository }}@main/${file}\""
+            echo "Run cmd: ${cmd}"
+            eval ${cmd}
+          done
