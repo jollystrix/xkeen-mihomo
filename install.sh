@@ -396,6 +396,7 @@ yq -i '
   .proxy-providers.subscription = {
     "type": "http",
     "url": "'"$SUB_URL"'",
+    "interval": 3600,
     "path": "./proxy_providers/sub.yml",
     "header": {
       "User-Agent": ["'"$UA"'"],
