@@ -397,7 +397,7 @@ yq -i '
       "interval": 300,
       "timeout": 5000,
       "lazy": true,
-      "expected-status": 204
+      "expected-status": 200
     }
   }
 ' "$NEW"
