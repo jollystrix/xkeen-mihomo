@@ -285,6 +285,8 @@ if [ -f "$CONFIG_PATH" ]; then
   esac
 fi
 
+rm -rf /opt/etc/mihomo/*
+
 SUB_URL="${1:-}"
 if [ -z "$SUB_URL" ]; then
   printf "Enter subscription link without https: "
