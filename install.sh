@@ -302,6 +302,10 @@ cat > "$UPDATE_SCRIPT" <<'UPDATEEOF'
 #!/bin/sh
 export PATH="/opt/sbin:/opt/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
+KEENETIC_IP=$(ip -4 addr show br0 | grep inet | awk '{print $2}' | cut -d/ -f1)
+
+curl -X POST "http://${KEENETIC_IP}:9090/ui/upgrade"
+
 CONF_DIR="/opt/etc/mihomo"
 CONFIG_PATH="$CONF_DIR/config.yaml"
 SUB_FILE="$CONF_DIR/.subscription"
@@ -447,9 +451,7 @@ if command -v xkeen >/dev/null 2>&1; then
 else
   XKEEN_FOREGROUND=1 /opt/sbin/xkeen -restart
 fi
-KEENETIC_IP=$(ip -4 addr show br0 | grep inet | awk '{print $2}' | cut -d/ -f1)
 
-curl -X POST "http://${KEENETIC_IP}:9090/ui/upgrade"
 
 UPDATEEOF
 
