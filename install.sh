@@ -139,8 +139,8 @@ latest_mihomo_version() {
 download_mihomo_binary() {
   detect_xkeen_architecture || return 1
   
-  version="$(latest_mihomo_version)"
-  echo $version
+  version="${1:-$(latest_mihomo_version)}"
+
   if [ -z "$version" ]; then
     echo "Failed to get the latest version of Mihomo."
     return 1
@@ -245,7 +245,9 @@ register_xkeen_offline() {
     exit 1
   fi
 }
-
+installed_mihomo_version() {
+  /opt/sbin/mihomo -v 2>/dev/null | head -n1 | grep -oE 'v[0-9]+(\.[0-9]+){1,2}' | head -n1
+}
 ensure_xkeen_mihomo() {
   if xkeen_is_installed; then
     echo "XKeen is already installed."
@@ -253,6 +255,17 @@ ensure_xkeen_mihomo() {
       echo "Installing Mihomo"
       download_mihomo_binary || exit 1
       register_xkeen_offline
+    else
+      current="$(installed_mihomo_version)"
+      latest="$(latest_mihomo_version)"
+      if [ -z "$latest" ]; then
+        echo "Could not check the latest Mihomo version, skipping update."
+      elif [ "$current" != "$latest" ]; then
+        echo "Updating Mihomo: ${current:-unknown} -> $latest"
+        download_mihomo_binary || exit 1
+      else
+        echo "Mihomo is up to date ($current)."
+      fi
     fi
     xkeen_run -mihomo >/dev/null 2>&1 || true
     return 0
