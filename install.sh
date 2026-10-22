@@ -392,54 +392,54 @@ yq -i '.["external-ui-url"] = "https://github.com/Zephyruso/zashboard/releases/l
 
 
 yq -i 'del(.tun)' "$NEW"
-yq -i 'del(.proxies)' "$NEW"
+# yq -i 'del(.proxies)' "$NEW"
 
 
 
-CNT="$(yq '.proxies | length' "$TMP" 2>/dev/null)"
-[ "${CNT:-0}" -gt 0 ] || fail "No proxies found in $TMP"
+#CNT="$(yq '.proxies | length' "$TMP" 2>/dev/null)"
+#[ "${CNT:-0}" -gt 0 ] || fail "No proxies found in $TMP"
 
-yq -i '
-  (load("'"$TMP"'") | [.proxies[].name]) as $names |
-  (.proxy-groups[] | select(has("proxies")) | .proxies) |=
-    map(select(. as $p | $names | any_c(. == $p) | not))
-' "$NEW"
+#yq -i '
+#  (load("'"$TMP"'") | [.proxies[].name]) as $names |
+#  (.proxy-groups[] | select(has("proxies")) | .proxies) |=
+#    map(select(. as $p | $names | any_c(. == $p) | not))
+#' "$NEW"
 
 
-yq -i '
-  del(.proxy-groups[] | select(has("proxies") and (.proxies | length) == 0) | .proxies)
-' "$NEW"
+#yq -i '
+#  del(.proxy-groups[] | select(has("proxies") and (.proxies | length) == 0) | .proxies)
+#' "$NEW"
 
-yq -i '
-  .proxy-providers.subscription = {
-    "type": "http",
-    "url": "'"$SUB_URL"'",
-    "interval": 3600,
-    "path": "./proxy_providers/sub.yml",
-    "header": {
-      "User-Agent": ["'"$UA"'"],
-      "x-hwid": ["'"$HWID"'"],
-      "x-device-os": ["Keenetic OS"],
-      "x-ver-os": ["'"$OS_VER"'"],
-      "x-device-model": ["'"$MODEL"'"]
-    },
-    "override": {"udp": true},
-    "health-check": {
-      "enable": true,
-      "url": "http://www.gstatic.com/generate_204",
-      "interval": 300,
-      "timeout": 5000,
-      "lazy": true,
-      "expected-status": 204
-    }
-  }
-' "$NEW"
+#yq -i '
+#  .proxy-providers.subscription = {
+#    "type": "http",
+#    "url": "'"$SUB_URL"'",
+#    "interval": 3600,
+#    "path": "./proxy_providers/sub.yml",
+#    "header": {
+#      "User-Agent": ["'"$UA"'"],
+#      "x-hwid": ["'"$HWID"'"],
+#      "x-device-os": ["Keenetic OS"],
+#      "x-ver-os": ["'"$OS_VER"'"],
+#      "x-device-model": ["'"$MODEL"'"]
+#    },
+#    "override": {"udp": true},
+#    "health-check": {
+#      "enable": true,
+#      "url": "http://www.gstatic.com/generate_204",
+#      "interval": 300,
+#      "timeout": 5000,
+#      "lazy": true,
+#      "expected-status": 204
+#    }
+#  }
+#' "$NEW"
 
-yq -i '.proxy-groups[] |= (.use = ((.use // []) + ["subscription"] | unique))' "$NEW"
+# yq -i '.proxy-groups[] |= (.use = ((.use // []) + ["subscription"] | unique))' "$NEW"
 
-if yq -e '((.["proxy-providers"] // {}) | length) > 0' "$NEW" >/dev/null 2>&1; then
-  yq -i '(.["proxy-providers"][] | select(.type == "http") | .header) = {"User-Agent":[strenv(UA)],"x-hwid":[strenv(HWID)],"x-device-os":["Keenetic OS"],"x-ver-os":[strenv(OS_VER)],"x-device-model":[strenv(MODEL)]}' "$NEW"
-fi
+#if yq -e '((.["proxy-providers"] // {}) | length) > 0' "$NEW" >/dev/null 2>&1; then
+#  yq -i '(.["proxy-providers"][] | select(.type == "http") | .header) = {"User-Agent":[strenv(UA)],"x-hwid":[strenv(HWID)],"x-device-os":["Keenetic OS"],"x-ver-os":[strenv(OS_VER)],"x-device-model":[strenv(MODEL)]}' "$NEW"
+#fi
 
 
 if ! TEST_OUT="$(mihomo -t -d "$CONF_DIR" -f "$NEW" 2>&1)"; then
