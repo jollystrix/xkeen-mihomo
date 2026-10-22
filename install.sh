@@ -246,7 +246,7 @@ register_xkeen_offline() {
   fi
 }
 installed_mihomo_version() {
-  /opt/sbin/mihomo -v 2>/dev/null | head -n1 | grep -oE 'v[0-9]+(\.[0-9]+){1,2}' | head -n1
+  /opt/sbin/mihomo -v 2>/dev/null | head -n1 | grep -oE 'v[0-9]+(\.[0-9]+){1,2}(-r[0-9]+)?' | head -n1
 }
 ensure_xkeen_mihomo() {
   if xkeen_is_installed; then
