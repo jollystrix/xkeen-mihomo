@@ -146,29 +146,29 @@ download_mihomo_binary() {
     return 1
   fi
 
-  case "$ARCHITECTURE" in
+ case "$ARCHITECTURE" in
     arm64-v8a)
-      mihomo_asset="mihomo-linux-arm64-$version.gz"
+      mihomo_asset="prizrak-core-linux-arm64-$version.gz"
       yq_asset="yq_linux_arm64"
       yq_base="$YQ_UPSTREAM_BASE"
       ;;
     mips32le)
       if [ "$SOFTFLOAT" = "true" ]; then
-        mihomo_asset="mihomo-linux-mipsle-softfloat-$version.gz"
+        mihomo_asset="prizrak-core-linux-mipsle-softfloat-$version.gz"
         yq_base="$YQ_WORKAROUND_BASE"
       else
-        mihomo_asset="mihomo-linux-mipsle-hardfloat-$version.gz"
+        mihomo_asset="prizrak-core-linux-mipsle-hardfloat-$version.gz"
         yq_base="$YQ_UPSTREAM_BASE"
       fi
       yq_asset="yq_linux_mipsle"
       ;;
     mips32)
-      mihomo_asset="mihomo-linux-mips-hardfloat-$version.gz"
+      mihomo_asset="prizrak-core-linux-mips-hardfloat-$version.gz"
       yq_asset="yq_linux_mips"
       yq_base="$YQ_UPSTREAM_BASE"
       ;;
   esac
-
+  
   mkdir -p /opt/sbin /tmp/xkeen-mihomo
 
   if ! /opt/sbin/yq --version >/dev/null 2>&1; then
