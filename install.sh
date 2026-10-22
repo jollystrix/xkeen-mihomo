@@ -9,8 +9,8 @@ UPDATE_SCRIPT="$CONF_DIR/update-config.sh"
 TPROXY_PORT=1181
 
 XKEEN_TARBALL_URL="https://github.com/jameszeroX/XKeen/releases/latest/download/xkeen.tar.gz"
-MIHOMO_RELEASE_API="https://api.github.com/repos/MetaCubeX/mihomo/releases/latest"
-MIHOMO_DOWNLOAD_BASE="https://github.com/MetaCubeX/mihomo/releases/download"
+MIHOMO_RELEASE_API="https://api.github.com/repos/legiz-ru/Prizrak-Core/releases/latest"
+MIHOMO_DOWNLOAD_BASE="https://github.com/legiz-ru/Prizrak-Core/releases/download"
 YQ_UPSTREAM_BASE="https://github.com/mikefarah/yq/releases/latest/download"
 YQ_WORKAROUND_BASE="https://github.com/jameszeroX/yq/releases/latest/download"
 
@@ -302,9 +302,6 @@ cat > "$UPDATE_SCRIPT" <<'UPDATEEOF'
 #!/bin/sh
 export PATH="/opt/sbin:/opt/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
-KEENETIC_IP=$(ip -4 addr show br0 | grep inet | awk '{print $2}' | cut -d/ -f1)
-
-curl -X POST "http://${KEENETIC_IP}:9090/ui/upgrade"
 
 CONF_DIR="/opt/etc/mihomo"
 CONFIG_PATH="$CONF_DIR/config.yaml"
